@@ -20,6 +20,11 @@ RUN \
 RUN \
   godep get -v github.com/ethereum/go-ethereum/cmd/geth
 
+RUN \
+  cd /gopath/src/github.com/ethereum/go-ethereum/cmd/geth && \
+  godep go build -a --ldflags '-extldflags "-static"' . && \
+  mv geth $GOBIN/
+
 # As of 2015-08-04 Docker on OSX + Boot2Docker mounts drives as VBOXFS which is
 # unusable by LevelDB. Use this script to mount instead as NFS.
 # https://gist.github.com/neilbartley/73f2eb334f04bf95a906
