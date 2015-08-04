@@ -1,31 +1,42 @@
-FROM ubuntu:utopic
-MAINTAINER caktux
+FROM alpine:3.2
 
-ENV DEBIAN_FRONTEND noninteractive
+ENV GOROOT /usr/lib/go
+ENV GOPATH /gopath
+ENV GOBIN /gopath/bin
+ENV PATH $PATH:$GOROOT/bin:$GOPATH/bin
 
-# Usual update / upgrade
-RUN apt-get update
-RUN apt-get upgrade -q -y
-RUN apt-get dist-upgrade -q -y
+RUN \
+  apk add --update \
+  bzr \
+  g++ \
+  git \
+  go \
+  gmp-dev \
+  mercurial
 
-# Let our containers upgrade themselves
-RUN apt-get install -q -y unattended-upgrades
+RUN \
+  go get -v github.com/tools/godep
 
-# Install Ethereum
-RUN apt-get install -q -y software-properties-common
-RUN add-apt-repository ppa:ethereum/ethereum
-RUN add-apt-repository ppa:ethereum/ethereum-dev
-RUN apt-get update
-RUN apt-get install -q -y geth
+RUN \
+  godep get -v github.com/ethereum/go-ethereum/cmd/geth
 
-# Install supervisor
-RUN apt-get install -q -y supervisor
+# As of 2015-08-04 Docker on OSX + Boot2Docker mounts drives as VBOXFS which is
+# unusable by LevelDB. Use this script to mount instead as NFS.
+# https://gist.github.com/neilbartley/73f2eb334f04bf95a906
 
-# Add supervisor configs
-ADD supervisord.conf supervisord.conf
+VOLUME ["/data"]
+
+WORKDIR /data
 
 EXPOSE 8545
-EXPOSE 30303
 
-CMD ["-n", "-c", "/supervisord.conf"]
-ENTRYPOINT ["/usr/bin/supervisord"]
+# RUN \
+#   apk del --purge -r \
+#   git go && \
+#   rm -rf /gopath/pkg && \
+#   rm -rf /gopath/src && \
+#   rm -rf /var/cache/apk/*
+
+ENTRYPOINT ["/gopath/bin/geth"]
+
+CMD ["--datadir", "/data", "--genesis", "/data/genesis_block.json", "--rpc", "--rpcaddr", "0.0.0.0", "--rpcport", "8545", "--rpccorsdomain", "*"]
