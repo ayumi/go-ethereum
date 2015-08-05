@@ -7,25 +7,17 @@ ENV PATH $PATH:$GOROOT/bin:$GOPATH/bin
 
 RUN \
   apk add --update \
-  bzr \
-  g++ \
-  git \
-  go \
-  gmp-dev \
-  mercurial
-
-RUN \
-  go get -v github.com/tools/godep
-
-RUN \
-  godep get -v github.com/ethereum/go-ethereum/cmd/geth
-
-RUN \
+    bzr \
+    g++ \
+    git \
+    go \
+    gmp-dev \
+    mercurial && \
+  go get -v github.com/tools/godep && \
+  godep get -v github.com/ethereum/go-ethereum/cmd/geth && \
   cd /gopath/src/github.com/ethereum/go-ethereum/cmd/geth && \
   godep go build -a --ldflags '-extldflags "-static"' . && \
-  mv geth $GOBIN/
-
-RUN \
+  mv geth $GOBIN/ && \
   apk del --purge -r \
     bzr \
     g++ \
