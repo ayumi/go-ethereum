@@ -25,6 +25,18 @@ RUN \
   godep go build -a --ldflags '-extldflags "-static"' . && \
   mv geth $GOBIN/
 
+RUN \
+  apk del --purge -r \
+    bzr \
+    g++ \
+    git \
+    go \
+    gmp-dev \
+    mercurial && \
+  rm -rf /gopath/pkg && \
+  rm -rf /gopath/src && \
+  rm -rf /var/cache/apk/*
+
 # As of 2015-08-04 Docker on OSX + Boot2Docker mounts drives as VBOXFS which is
 # unusable by LevelDB. Use this script to mount instead as NFS.
 # https://gist.github.com/neilbartley/73f2eb334f04bf95a906
@@ -38,13 +50,6 @@ EXPOSE 8545
 
 # Network listening port
 EXPOSE 30303
-
-# RUN \
-#   apk del --purge -r \
-#   git go && \
-#   rm -rf /gopath/pkg && \
-#   rm -rf /gopath/src && \
-#   rm -rf /var/cache/apk/*
 
 ENTRYPOINT ["/gopath/bin/geth"]
 
