@@ -29,11 +29,15 @@ RUN \
 # unusable by LevelDB. Use this script to mount instead as NFS.
 # https://gist.github.com/neilbartley/73f2eb334f04bf95a906
 
-VOLUME ["/data"]
+VOLUME ["/data", "/ipc"]
 
 WORKDIR /data
 
+# RPC port
 EXPOSE 8545
+
+# Network listening port
+EXPOSE 30303
 
 # RUN \
 #   apk del --purge -r \
@@ -44,4 +48,14 @@ EXPOSE 8545
 
 ENTRYPOINT ["/gopath/bin/geth"]
 
-CMD ["--datadir", "/data", "--genesis", "/data/genesis_block.json", "--rpc", "--rpcaddr", "0.0.0.0", "--rpcport", "8545", "--rpccorsdomain", "*"]
+CMD [ \
+  "--datadir", "/data", \
+  "--genesis", "/data/genesis_block.json", \
+  "--ipcpath", "/ipc/geth.ipc", \
+  "--logtostderr", \
+  "--rpc", \
+  "--rpcaddr", "0.0.0.0", \
+  "--rpcapi", "admin,db,eth,debug,miner,net,shh,txpool,personal,web3", \
+  "--rpcport", "8545", \
+  "--rpccorsdomain", "*" \
+]
