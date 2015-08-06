@@ -47,7 +47,6 @@ ENTRYPOINT ["/gopath/bin/geth"]
 
 CMD [ \
   "--datadir", "/data", \
-  "--genesis", "/data/genesis_block.json", \
   "--ipcpath", "/ipc/geth.ipc", \
   "--logtostderr", \
   "--rpc", \
